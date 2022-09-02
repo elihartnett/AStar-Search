@@ -11,7 +11,7 @@ import SwiftUI
 struct AStar_SearchApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
         }
     }
 }
