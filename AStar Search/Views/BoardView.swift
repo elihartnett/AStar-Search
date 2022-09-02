@@ -11,7 +11,6 @@ struct BoardView: View {
     
     @ObservedObject var boardModel: BoardModel
     var addSpaceType: SpaceType
-    @State var dragsPoints: [CGPoint] = []
     
     var body: some View {
         

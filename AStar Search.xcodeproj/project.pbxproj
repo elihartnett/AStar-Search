@@ -14,6 +14,7 @@
 		621392C928C1225C00CB0FE8 /* BoardSpace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621392C828C1225C00CB0FE8 /* BoardSpace.swift */; };
 		621392CB28C1226F00CB0FE8 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621392CA28C1226F00CB0FE8 /* Enums.swift */; };
 		621392CD28C1229900CB0FE8 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621392CC28C1229900CB0FE8 /* Extensions.swift */; };
+		6247A6AE28C2437600C8FB09 /* GridPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6247A6AD28C2437600C8FB09 /* GridPoint.swift */; };
 		62529C9C28BEAE610083F810 /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62529C9B28BEAE610083F810 /* Board.swift */; };
 		62E6DE5128BEA95B00E31C8B /* AStar_SearchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E6DE5028BEA95B00E31C8B /* AStar_SearchApp.swift */; };
 		62E6DE5328BEA95B00E31C8B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E6DE5228BEA95B00E31C8B /* HomeView.swift */; };
@@ -29,6 +30,7 @@
 		621392C828C1225C00CB0FE8 /* BoardSpace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardSpace.swift; sourceTree = "<group>"; };
 		621392CA28C1226F00CB0FE8 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		621392CC28C1229900CB0FE8 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		6247A6AD28C2437600C8FB09 /* GridPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridPoint.swift; sourceTree = "<group>"; };
 		62529C9B28BEAE610083F810 /* Board.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
 		62E6DE4D28BEA95B00E31C8B /* AStar Search.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AStar Search.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		62E6DE5028BEA95B00E31C8B /* AStar_SearchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AStar_SearchApp.swift; sourceTree = "<group>"; };
@@ -54,6 +56,7 @@
 				62529C9B28BEAE610083F810 /* Board.swift */,
 				621392C628C1224C00CB0FE8 /* BoardRow.swift */,
 				621392C828C1225C00CB0FE8 /* BoardSpace.swift */,
+				6247A6AD28C2437600C8FB09 /* GridPoint.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -188,6 +191,7 @@
 				621392BE28C11BE800CB0FE8 /* BoardModel.swift in Sources */,
 				62E6DE5328BEA95B00E31C8B /* HomeView.swift in Sources */,
 				621392C328C121BE00CB0FE8 /* BoardView.swift in Sources */,
+				6247A6AE28C2437600C8FB09 /* GridPoint.swift in Sources */,
 				621392C728C1224C00CB0FE8 /* BoardRow.swift in Sources */,
 				62529C9C28BEAE610083F810 /* Board.swift in Sources */,
 				621392CD28C1229900CB0FE8 /* Extensions.swift in Sources */,

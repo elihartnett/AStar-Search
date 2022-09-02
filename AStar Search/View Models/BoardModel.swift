@@ -11,16 +11,24 @@ import SwiftUI
 class BoardModel: ObservableObject {
     
     @Published var board = Board(rows: [])
-    @Published var boardSize = 10.0
+    @Published var boardSize = 10
+    
     @Published var start: BoardSpace?
     @Published var goal: BoardSpace?
     
+    var queue: [BoardSpace] = []
+    var currentSpace: BoardSpace?
+    
+    @Published var shortestPath: [BoardSpace] = []
+    var visitedSpaces: [BoardSpace] = []
+    var distanceTraveled = 0.0
+    
     func createBoard() {
         let newBoard = Board(rows: [])
-        for row in 0..<Int(boardSize) {
+        for row in 0..<boardSize {
             let newRow = BoardRow(spaces: [])
-            for col in 0..<Int(boardSize) {
-                newRow.spaces.append(BoardSpace(type: .empty, x: col, y: Int(boardSize) - row - 1))
+            for col in 0..<boardSize {
+                newRow.spaces.append(BoardSpace(type: .empty, gridPoint: GridPoint(x: col, y: boardSize - 1 - row)))
             }
             newBoard.rows.append(newRow)
         }
@@ -72,50 +80,43 @@ class BoardModel: ObservableObject {
         goal = nil
     }
     
-    func getSpaceColor(type: SpaceType) -> Color {
-        switch type {
-        case .start:
-            return .white
-        case .empty:
-            return .green
-        case .obstacle:
-            return .red
-        case .goal:
-            return .black
-        }
+    func getBoardSpace(at gridPoint: GridPoint) -> BoardSpace {
+        return board.rows[Int(boardSize - 1 - gridPoint.y)].spaces[gridPoint.x]
     }
     
-    func getBoardSpace(at point: CGPoint) -> BoardSpace {
-        return board.rows[Int(boardSize - 1 - point.y)].spaces[Int(point.x)]
-    }
-    
-    func getAvailableMoves(space: BoardSpace) -> [CGPoint] {
-        var moves: [CGPoint] = []
+    func getAvailableSpaces(space: BoardSpace) -> [BoardSpace] {
+        var availableSpaces: [BoardSpace] = []
         
         let xRange = 0...boardSize - 1
         let yRange = 0...boardSize - 1
         
-        let x = space.x
-        let y = space.y
+        let x = space.gridPoint.x
+        let y = space.gridPoint.y
         
-        let moveUp = CGPoint(x: x, y: y + 1)
-        let moveDown = CGPoint(x: x, y: y - 1)
-        let moveLeft = CGPoint(x: x - 1, y: y)
-        let moveRight = CGPoint(x: x + 1, y: y)
+        let moveUp = GridPoint(x: x, y: y + 1)
+        let moveDown = GridPoint(x: x, y: y - 1)
+        let moveLeft = GridPoint(x: x - 1, y: y)
+        let moveRight = GridPoint(x: x + 1, y: y)
         
-        if yRange.contains(moveUp.y) && getBoardSpace(at: moveUp).type != .obstacle {
-            moves.append(moveUp)
+        if yRange.contains(Int(moveUp.y)) && getBoardSpace(at: moveUp).type != .obstacle {
+            availableSpaces.append(getBoardSpace(at: moveUp))
         }
-        if yRange.contains(moveDown.y) && getBoardSpace(at: moveDown).type != .obstacle {
-            moves.append(moveDown)
+        if yRange.contains(Int(moveDown.y)) && getBoardSpace(at: moveDown).type != .obstacle {
+            availableSpaces.append(getBoardSpace(at: moveDown))
         }
-        if xRange.contains(moveLeft.x) && getBoardSpace(at: moveLeft).type != .obstacle {
-            moves.append(moveLeft)
+        if xRange.contains(Int(moveLeft.x)) && getBoardSpace(at: moveLeft).type != .obstacle {
+            availableSpaces.append(getBoardSpace(at: moveLeft))
         }
-        if xRange.contains(moveRight.x) && getBoardSpace(at: moveRight).type != .obstacle {
-            moves.append(moveRight)
+        if xRange.contains(Int(moveRight.x)) && getBoardSpace(at: moveRight).type != .obstacle {
+            availableSpaces.append(getBoardSpace(at: moveRight))
         }
         
-        return moves
+        return availableSpaces
+    }
+    
+    func getEuclideanDistanceToGoal(space: BoardSpace) -> Double {
+        let a = abs(goal!.gridPoint.x - space.gridPoint.x)
+        let b = abs(goal!.gridPoint.y - space.gridPoint.y)
+        return sqrt(Double((a*a) + (b*b)))
     }
 }

@@ -1,5 +1,5 @@
 //
-//  BoardSpace.swift
+//  Board.swift
 //  AStar Search
 //
 //  Created by Eli Hartnett on 8/30/22.

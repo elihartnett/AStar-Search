@@ -16,7 +16,7 @@ struct SpaceView: View {
     var body: some View {
         
         Rectangle()
-            .fill(boardModel.getSpaceColor(type: space.type))
+            .fill(space.getColor())
             .border(.black)
             .onTapGesture {
                 boardModel.handleConfigurationTap(addSpaceType: addSpaceType, space: space)

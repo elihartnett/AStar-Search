@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  HomeView.swift
 //  AStar Search
 //
 //  Created by Eli Hartnett on 8/30/22.
@@ -11,6 +11,7 @@ struct HomeView: View {
     
     @StateObject var boardModel = BoardModel()
     @State var addSpaceType: SpaceType = .start
+    @State var sliderValue: Double = 10
     
     var body: some View {
         
@@ -28,8 +29,11 @@ struct HomeView: View {
             }
             .pickerStyle(.segmented)
             
-            Slider(value: $boardModel.boardSize, in: 5...15, step: 1) { _ in
+            Slider(value: $sliderValue, in: 5...15, step: 1) { _ in
                 boardModel.createBoard()
+            }
+            .onChange(of: sliderValue) { _ in
+                boardModel.boardSize = Int(sliderValue)
             }
             
             BoardView(boardModel: boardModel, addSpaceType: addSpaceType)
@@ -38,7 +42,10 @@ struct HomeView: View {
                 }
             
             Button {
-                print(boardModel.getAvailableMoves(space: boardModel.start!))
+                let availableSpaces = boardModel.getAvailableSpaces(space: boardModel.start!)
+                for space in availableSpaces {
+                    space.distanceFromGoal = boardModel.getEuclideanDistanceToGoal(space: space)
+                }
             } label: {
                 Text("Submit")
             }

@@ -6,16 +6,29 @@
 //
 
 import Foundation
+import SwiftUI
 
 class BoardSpace: Identifiable, ObservableObject {
     let id = UUID()
-    var x = 0
-    var y = 0
+    var gridPoint: GridPoint
     @Published var type: SpaceType
+    var distanceFromGoal: Double?
     
-    init(type: SpaceType, x: Int, y: Int) {
+    init(type: SpaceType, gridPoint: GridPoint) {
         self.type = type
-        self.x = x
-        self.y = y
+        self.gridPoint = gridPoint
+    }
+    
+    func getColor() -> Color {
+        switch type {
+        case .start:
+            return .white
+        case .empty:
+            return .green
+        case .obstacle:
+            return .red
+        case .goal:
+            return .black
+        }
     }
 }
