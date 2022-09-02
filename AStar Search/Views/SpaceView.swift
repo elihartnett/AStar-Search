@@ -21,7 +21,6 @@ struct SpaceView: View {
             .onTapGesture {
                 boardModel.handleConfigurationTap(addSpaceType: addSpaceType, space: space)
             }
-
     }
 }
 

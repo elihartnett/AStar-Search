@@ -86,7 +86,7 @@ class BoardModel: ObservableObject {
     }
     
     func getBoardSpace(at point: CGPoint) -> BoardSpace {
-        return board.rows[Int(point.y)].spaces[Int(point.x)]
+        return board.rows[Int(boardSize - 1 - point.y)].spaces[Int(point.x)]
     }
     
     func getAvailableMoves(space: BoardSpace) -> [CGPoint] {
