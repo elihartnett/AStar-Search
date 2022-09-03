@@ -44,6 +44,7 @@ class BoardModel: ObservableObject {
             }
             space.type = .start
             start = space
+            currentSpace = start
             
         case .empty:
             if space.type == .start {
@@ -84,14 +85,14 @@ class BoardModel: ObservableObject {
         return board.rows[Int(boardSize - 1 - gridPoint.y)].spaces[gridPoint.x]
     }
     
-    func getAvailableSpaces(space: BoardSpace) -> [BoardSpace] {
+    func getAvailableSpaces() -> [BoardSpace] {
         var availableSpaces: [BoardSpace] = []
         
         let xRange = 0...boardSize - 1
         let yRange = 0...boardSize - 1
         
-        let x = space.gridPoint.x
-        let y = space.gridPoint.y
+        let x = currentSpace!.gridPoint.x
+        let y = currentSpace!.gridPoint.y
         
         let moveUp = GridPoint(x: x, y: y + 1)
         let moveDown = GridPoint(x: x, y: y - 1)
@@ -118,5 +119,28 @@ class BoardModel: ObservableObject {
         let a = abs(goal!.gridPoint.x - space.gridPoint.x)
         let b = abs(goal!.gridPoint.y - space.gridPoint.y)
         return sqrt(Double((a*a) + (b*b)))
+    }
+    
+    func goToNextSpace() {
+        // Figure out which direction it can move
+        let availableSpaces = getAvailableSpaces()
+        // Figure out which move is closest to goal
+        for space in availableSpaces {
+            if space.distanceFromGoal == nil {
+                space.distanceFromGoal = getEuclideanDistanceToGoal(space: space)
+            }
+        }
+        // Add to queue of moves with shortest move to goal on top
+        queue.append(contentsOf: availableSpaces)
+        queue = queue.sorted { lhs, rhs in
+            return lhs.distanceFromGoal! > rhs.distanceFromGoal!
+        }
+        // Pop off shortest move to goal
+        let nextSpace = queue.popLast()
+        
+        // Make move
+        currentSpace = nextSpace
+        visitedSpaces.append(nextSpace!)
+        distanceTraveled += 1
     }
 }

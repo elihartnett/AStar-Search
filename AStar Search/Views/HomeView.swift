@@ -42,12 +42,9 @@ struct HomeView: View {
                 }
             
             Button {
-                let availableSpaces = boardModel.getAvailableSpaces(space: boardModel.start!)
-                for space in availableSpaces {
-                    space.distanceFromGoal = boardModel.getEuclideanDistanceToGoal(space: space)
-                }
+                boardModel.goToNextSpace()
             } label: {
-                Text("Submit")
+                Text("Start")
             }
         }
         .padding()
