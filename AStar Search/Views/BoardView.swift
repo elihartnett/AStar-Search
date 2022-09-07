@@ -28,6 +28,20 @@ struct BoardView: View {
                     }
                 }
             }
+            .gesture(
+                DragGesture()
+                    .onChanged({ value in
+                        let rowPercent = value.location.x / geo.size.width
+                        let heightPercent = value.location.y / geo.size.height
+                        
+                        let row = Int(floor(rowPercent * CGFloat(boardModel.boardSize)))
+                        let col = Int(floor(heightPercent * CGFloat(boardModel.boardSize)))
+                        
+                        if let space = boardModel.getBoardSpace(at: GridPoint(x: row, y: boardModel.boardSize - 1 - col)) {
+                            boardModel.handleConfigurationTap(addSpaceType: addSpaceType, space: space)
+                        }
+                    })
+            )
         }
     }
 }

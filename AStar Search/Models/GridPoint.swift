@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct GridPoint {
+struct GridPoint: Equatable {
     var x: Int
     var y: Int
 }

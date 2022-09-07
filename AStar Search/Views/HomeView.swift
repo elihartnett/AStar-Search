@@ -41,10 +41,27 @@ struct HomeView: View {
                     boardModel.createBoard()
                 }
             
-            Button {
-                boardModel.goToNextSpace()
-            } label: {
-                Text("Start")
+            HStack {
+                
+                Spacer()
+                
+                Button {
+                    boardModel.createBoard()
+                } label: {
+                    Text("Reset")
+                }
+                
+                Spacer()
+
+                                
+                Button {
+                    boardModel.findShortestPath()
+                } label: {
+                    Text("Find shortest path")
+                }
+                
+                Spacer()
+
             }
         }
         .padding()
