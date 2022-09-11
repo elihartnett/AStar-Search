@@ -12,23 +12,22 @@ class BoardModel: ObservableObject {
     
     @Published var board = Board(rows: [])
     @Published var boardSize = 10
+    let scale = 2
     
     @Published var start: BoardSpace?
     @Published var goal: BoardSpace?
     
-    var queue: [Path] = []
-    var shortestPath: Path?
-
-    var currentSpace: BoardSpace?
-    var visitedSpaces: [BoardSpace] = []
+    @Published var queue: [Path] = []
+    @Published var visitedSpaces: [BoardSpace] = []
+    
+    @Published var shortestPath: Path?
+    @Published var currentPath = Path(spaces: [])
+    @Published var currentSpace: BoardSpace?
+    @Published var lastSpace: BoardSpace?
     
     func createBoard() {
-        start = nil
-        goal = nil
-        queue.removeAll()
-        shortestPath = nil
-        currentSpace = nil
-        visitedSpaces.removeAll()
+        
+        resetBoard()
         
         let newBoard = Board(rows: [])
         for row in 0..<boardSize {
@@ -41,6 +40,92 @@ class BoardModel: ObservableObject {
         board = newBoard
     }
     
+    func scaleBoard() {
+        let newBoard = Board(rows: [])
+        for row in 0..<boardSize * scale {
+            let newRow = BoardRow(spaces: [])
+            for col in 0..<boardSize * scale {
+                newRow.spaces.append(BoardSpace(type: .empty, gridPoint: GridPoint(x: col, y: (boardSize * scale) - 1 - row)))
+            }
+            newBoard.rows.append(newRow)
+        }
+        
+        let newStartSpaces = getScaledSpacesForSpace(scale: scale, space: start!)
+        start = newStartSpaces[0]
+        for space in newStartSpaces {
+            if space.gridPoint.x < start!.gridPoint.x && space.gridPoint.y < start!.gridPoint.y {
+                start = newBoard.rows[space.gridPoint.y].spaces[space.gridPoint.x]
+            }
+        }
+        print(start?.gridPoint)
+        
+        let newGoalSpaces = getScaledSpacesForSpace(scale: scale, space: goal!)
+        goal = newGoalSpaces[0]
+        for space in newGoalSpaces {
+            if space.gridPoint.x < goal!.gridPoint.x && space.gridPoint.y < goal!.gridPoint.y {
+                goal = newBoard.rows[((boardSize * scale) - 1) - space.gridPoint.y].spaces[space.gridPoint.x]
+            }
+        }
+        print(goal?.gridPoint)
+        
+        for (rowIndex, row) in board.rows.enumerated() {
+            for (colIndex, _) in row.spaces.enumerated() {
+                let gridPoint = GridPoint(x: colIndex, y: rowIndex)
+                let space = getBoardSpace(at: gridPoint)!
+                let points = getScaledSpacesForSpace(scale: scale, space: space)
+                for point in points {
+                    switch point.type {
+                    case .start:
+                        newBoard.rows[((boardSize * scale) - 1) - point.gridPoint.y].spaces[point.gridPoint.x].type = .empty
+                    case .goal:
+                        newBoard.rows[((boardSize * scale) - 1) - point.gridPoint.y].spaces[point.gridPoint.x].type = .empty
+                    default:
+                        newBoard.rows[((boardSize * scale) - 1) - point.gridPoint.y].spaces[point.gridPoint.x].type = point.type
+                    }
+                }
+            }
+        }
+        
+        newBoard.rows[((boardSize * scale) - 1) - start!.gridPoint.y].spaces[start!.gridPoint.x].type = .start
+        newBoard.rows[((boardSize * scale) - 1) - goal!.gridPoint.y].spaces[goal!.gridPoint.x].type = .goal
+        
+        currentPath = Path(spaces: [start!])
+        queue.removeAll()
+        queue.append(currentPath)
+        
+        board = newBoard
+        boardSize *= scale
+    }
+    
+    func getScaledSpacesForSpace(scale: Int, space: BoardSpace) -> [BoardSpace] {
+        var spaces: [BoardSpace] = []
+        
+        let minX = space.gridPoint.x * scale
+        let minY = space.gridPoint.y * scale
+        
+        let maxX = minX + (scale - 1)
+        let maxY = minY + (scale - 1)
+        
+        for xSpace in minX...maxX {
+            for ySpace in minY...maxY {
+                spaces.append(BoardSpace(type: space.type, gridPoint: GridPoint(x: xSpace, y: ySpace)))
+            }
+        }
+        
+        return spaces
+    }
+    
+    func resetBoard() {
+        start = nil
+        goal = nil
+        queue.removeAll()
+        visitedSpaces.removeAll()
+        shortestPath = nil
+        currentSpace = nil
+        currentPath.spaces.removeAll()
+        boardSize = 10
+    }
+    
     func handleConfigurationTap(addSpaceType: SpaceType, space: BoardSpace) {
         switch addSpaceType {
         case .start:
@@ -50,7 +135,13 @@ class BoardModel: ObservableObject {
             }
             space.type = .start
             start = space
+            
+            visitedSpaces.removeAll()
+            visitedSpaces.append(start!)
             currentSpace = start
+            currentPath = Path(spaces: [start!])
+            queue.removeAll()
+            queue.append(currentPath)
             
         case .empty:
             if space.type == .start {
@@ -105,129 +196,127 @@ class BoardModel: ObservableObject {
         let x = gridPoint.x
         let y = gridPoint.y
         
-        let moveUp = GridPoint(x: x, y: y + 1)
-        let moveDown = GridPoint(x: x, y: y - 1)
-        let moveLeft = GridPoint(x: x - 1, y: y)
-        let moveRight = GridPoint(x: x + 1, y: y)
+        let possibleMoves = [GridPoint(x: x, y: y + 1), GridPoint(x: x, y: y - 1), GridPoint(x: x - 1, y: y), GridPoint(x: x + 1, y: y), GridPoint(x: x - 1, y: y + 1), GridPoint(x: x + 1, y: y + 1), GridPoint(x: x - 1, y: y - 1), GridPoint(x: x + 1, y: y - 1)]
         
-        if let space = getBoardSpace(at: moveUp) {
-            if space.type != .obstacle { availableSpaces.append(space) }
-        }
-        if let space = getBoardSpace(at: moveDown) {
-            if space.type != .obstacle { availableSpaces.append(space) }
-        }
-        if let space = getBoardSpace(at: moveLeft) {
-            if space.type != .obstacle { availableSpaces.append(space) }
-        }
-        if let space = getBoardSpace(at: moveRight) {
-            if space.type != .obstacle { availableSpaces.append(space) }
+        for space in possibleMoves {
+            if let boardSpace = getBoardSpace(at: space) {
+                if boardSpace.type != .obstacle { availableSpaces.append(boardSpace) }
+            }
         }
         
         return availableSpaces
     }
     
-    func getEuclideanDistanceToGoal(space: BoardSpace) -> Double {
-        let a = abs(goal!.gridPoint.x - space.gridPoint.x)
-        let b = abs(goal!.gridPoint.y - space.gridPoint.y)
-        return sqrt(Double((a*a) + (b*b)))
+    func getChebyshevDistanceToGoal(space: BoardSpace) -> Int {
+        let x = abs(goal!.gridPoint.x - space.gridPoint.x)
+        let y = abs(goal!.gridPoint.y - space.gridPoint.y)
+        return max(x, y)
     }
     
-    func findShortestPath() {
-        currentSpace = start
-        visitedSpaces.append(start!)
+    func makeNextMove() {
         
-        // Figure out which direction current space can move to
-        var availableSpaces = getAvailableSpacesFromGridPoint(gridPoint: currentSpace!.gridPoint)
+        if shortestPath != nil {
+            guard getMinimumDistanceToGoal(path: currentPath) < shortestPath!.distance else {
+                currentPath = queue.popLast()!
+                return
+            }
+        }
         
-        // Create paths from available spaces
+        // Get available spaces
+        var availableSpaces = getAvailableSpacesFromGridPoint(gridPoint: currentPath.spaces.last!.gridPoint)
+        
+        guard !availableSpaces.isEmpty else {
+            currentPath = queue.popLast()!
+            return
+        }
+        
+        // Remove all spaces that have already been visited
+        availableSpaces.removeAll { availableSpace in
+            visitedSpaces.contains(availableSpace)
+        }
+        
+        guard !availableSpaces.isEmpty else {
+            currentPath = queue.popLast()!
+            return
+        }
+        
+        // Get each space's distance to goal
         for space in availableSpaces {
-            space.distanceFromGoal = getEuclideanDistanceToGoal(space: space)
-            let path = Path(spaces: [space])
-            queue.append(path)
+            space.distanceToGoal = getChebyshevDistanceToGoal(space: space)
+            if space.distanceToGoal != 0 {
+                visitedSpaces.append(space)
+            }
         }
         
-        // Sort queue of available paths by distance to goal in descending order (shortest on top)
-        queue = queue.sorted { lhs, rhs in
-            return (lhs.spaces.last?.distanceFromGoal)! > (rhs.spaces.last?.distanceFromGoal)!
+        // Get closest space to goal
+        var closestSpace = availableSpaces[0]
+        for space in availableSpaces {
+            if space.distanceToGoal! < closestSpace.distanceToGoal! {
+                closestSpace = space
+            }
         }
         
-        while !queue.isEmpty {
-            print("Exploring path with root: \(queue.last?.spaces.last?.gridPoint)")
-            explorePath(queue.popLast()!)
+        // Create new paths for spaces that are not closest
+        for space in availableSpaces {
+            if space != closestSpace {
+                if shortestPath == nil || getMinimumDistanceToGoal(path: currentPath) < shortestPath!.distance {
+                    let newPath = Path(spaces: currentPath.spaces)
+                    newPath.spaces.append(space)
+                    newPath.distance = currentPath.spaces.count
+                    queue.append(newPath)
+                }
+            }
+            else {
+                // Go to next space in current path
+                lastSpace = currentSpace
+                lastSpace?.overlay = .clear
+                currentSpace = closestSpace
+                
+                currentPath.spaces.append(closestSpace)
+                currentPath.distance += 1
+                currentSpace?.overlay = .yellow.opacity(0.5)
+            }
         }
-        print("-----")
-        for space in shortestPath!.spaces {
-            space.type = .obstacle
+        
+        // Sort queue (closest path to goal is at end)
+        queue = queue.sorted(by: { lhs, rhs in
+            getMinimumDistanceToGoal(path: lhs) > getMinimumDistanceToGoal(path: rhs)
+        })
+        
+        // Check if path is at end
+        if currentSpace?.gridPoint == goal?.gridPoint {
+            // Update shortest path if needed
+            if shortestPath != nil {
+                if currentPath.distance < shortestPath!.distance { shortestPath = currentPath }
+            }
+            else {
+                shortestPath = currentPath
+            }
+            
+            if !queue.isEmpty {
+                currentPath = queue.popLast()!
+            }
         }
     }
     
-    func explorePath(_ path: Path) {
-        
-        currentSpace = path.spaces.first
-        
-        var finishedWithPath = false
-        while !finishedWithPath {
-            // Figure out which direction current space can move to
-            var availableSpaces = getAvailableSpacesFromGridPoint(gridPoint: currentSpace!.gridPoint)
-            
-            // Remove spaces that have already been visited
-            availableSpaces.removeAll { availableSpace in
-                visitedSpaces.contains { vistedSpace in
-                    availableSpace == vistedSpace
-                }
-            }
-
-            guard !availableSpaces.isEmpty else { return }
-            
-            var minDistanceToGoal = getEuclideanDistanceToGoal(space: availableSpaces.first!)
-            // Figure out which move is closest to goal
-            for space in availableSpaces {
-                space.distanceFromGoal = getEuclideanDistanceToGoal(space: space)
-                print("Got distance for \(space.gridPoint)")
-                visitedSpaces.append(space)
-                if let shortestPathDistance = shortestPath?.distance {
-                    if (space.distanceFromGoal! + Double(path.distance) > Double(shortestPathDistance)) {
-                        print("just gonna abort")
-                        let index = availableSpaces.firstIndex(of: space)
-                        availableSpaces.remove(at: index!)
-                        continue
-                    }
-                }
-                if space.distanceFromGoal! < minDistanceToGoal {
-                    minDistanceToGoal = space.distanceFromGoal!
-                }
-            }
-            
-            guard !availableSpaces.isEmpty else { return }
-            
-            // Create available paths from available spaces
-            for space in availableSpaces {
-                if space.distanceFromGoal! != minDistanceToGoal {
-                    let path = Path(spaces: [space])
-                    queue.append(path)
-                }
-                else {
-                    currentSpace = space
-                    visitedSpaces.append(space)
-                    path.distance += 1
-                    path.spaces.append(space)
-                }
-            }
-            
-            // Sort queue of available paths by distance to goal in descending order (shortest on top)
-            queue = queue.sorted { lhs, rhs in
-                return (lhs.spaces.last?.distanceFromGoal)! > (rhs.spaces.last?.distanceFromGoal)!
-            }
-            
-            if currentSpace?.gridPoint == goal?.gridPoint {
-                finishedWithPath = true
-                if shortestPath == nil {
-                    shortestPath = path
-                }
-                if path.distance < shortestPath!.distance {
-                    shortestPath = path
-                }
+    func pathAsString(path: Path) -> String {
+        var pathString = ""
+        for space in path.spaces {
+            pathString += "(\(space.gridPoint.x), \(space.gridPoint.y))"
+        }
+        return pathString
+    }
+    
+    func highlightShortestPath() {
+        for space in shortestPath!.spaces {
+            if space.type != .start && space.type != .goal {
+                space.overlay = .yellow
             }
         }
+    }
+    
+    func getMinimumDistanceToGoal(path: Path) -> Int {
+        return path.distance + getChebyshevDistanceToGoal(space: path.spaces.last!)
     }
 }
+

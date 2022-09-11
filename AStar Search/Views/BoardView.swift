@@ -29,7 +29,7 @@ struct BoardView: View {
                 }
             }
             .gesture(
-                DragGesture()
+                DragGesture(minimumDistance: 0)
                     .onChanged({ value in
                         let rowPercent = value.location.x / geo.size.width
                         let heightPercent = value.location.y / geo.size.height

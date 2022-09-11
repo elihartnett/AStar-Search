@@ -13,7 +13,8 @@ class BoardSpace: Identifiable, ObservableObject, Equatable {
     let id = UUID()
     var gridPoint: GridPoint
     @Published var type: SpaceType
-    var distanceFromGoal: Double?
+    var distanceToGoal: Int?
+    @Published var overlay = Color.clear
     
     init(type: SpaceType, gridPoint: GridPoint) {
         self.type = type
