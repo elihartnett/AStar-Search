@@ -19,6 +19,7 @@ struct HomeView: View {
         
         VStack {
             
+            // Picker
             Picker("Picker", selection: $addSpaceType) {
                 Text("Start")
                     .tag(SpaceType.start)
@@ -31,11 +32,73 @@ struct HomeView: View {
             }
             .pickerStyle(.segmented)
             
+            HStack {
+                
+                VStack {
+                    Rectangle()
+                        .fill(.white)
+                        .frame(width: 25, height: 25)
+                    Text("Start")
+                }
+                .padding()
+                
+                VStack {
+                    Rectangle()
+                        .fill(.green)
+                        .frame(width: 25, height: 25)
+                    Text("Empty")
+                }
+                .padding()
+                               
+                VStack {
+                    Rectangle()
+                        .fill(.red)
+                        .frame(width: 25, height: 25)
+                    Text("Obstacle")
+                }
+                .padding()
+                                
+                VStack {
+                    Rectangle()
+                        .fill(.black)
+                        .frame(width: 25, height: 25)
+                    Text("Goal")
+                }
+                .padding()
+                                
+                VStack {
+                    Rectangle()
+                        .fill(.yellow.opacity(0.5))
+                        .frame(width: 25, height: 25)
+                    Text("Currently viewing")
+                }
+                .padding()
+                
+                VStack {
+                    Rectangle()
+                        .fill(.yellow)
+                        .frame(width: 25, height: 25)
+                    Text("In shortest path")
+                }
+                .padding()
+                
+                VStack {
+                    Rectangle()
+                        .fill(.black.opacity(0.5))
+                        .frame(width: 25, height: 25)
+                    Text("Checked")
+                }
+                .padding()
+            }
+            .padding()
+            .background { Color.gray.opacity(0.5)}
+            
             BoardView(boardModel: boardModel, addSpaceType: addSpaceType)
                 .onAppear {
                     boardModel.createBoard()
                 }
             
+            // Menu buttons
             HStack {
                 
                 Spacer()
@@ -43,20 +106,21 @@ struct HomeView: View {
                 Button {
                     boardModel.createBoard()
                 } label: {
-                    Text("Reset")
+                    VStack {
+                        Image(systemName: "clear")
+                        Text("Reset")
+                    }
                 }
                 
                 Spacer()
                 
                 Button {
-                    guard boardModel.start != nil && boardModel.goal != nil else {
-                        alertMessage = "Please make sure you have selected start and goal nodes."
-                        showAlert = true
-                        return
-                    }
                     boardModel.scaleBoard()
                 } label: {
-                    Image(systemName: "magnifyingglass")
+                    VStack {
+                        Image(systemName: "magnifyingglass")
+                        Text("Scale")
+                    }
                 }
                 
                 Spacer()
@@ -75,7 +139,10 @@ struct HomeView: View {
                         boardModel.highlightShortestPath()
                     }
                 } label: {
-                    Image(systemName: "forward.frame")
+                    VStack {
+                        Image(systemName: "forward.frame")
+                        Text("Move")
+                    }
                 }
                 
                 Spacer()
@@ -98,16 +165,20 @@ struct HomeView: View {
                     }
                     boardModel.highlightShortestPath()
                 } label: {
-                    Image(systemName: "forward.end.alt")
+                    VStack {
+                        Image(systemName: "forward.end.alt")
+                        Text("Skip to end")
+                    }
                 }
                 
                 Spacer()
                 
             }
+            .padding()
             .alert(alertMessage, isPresented: $showAlert) {
                 Button("Ok", role: .cancel) { }
             }
-
+            
             
             ScrollView {
                 
@@ -116,7 +187,7 @@ struct HomeView: View {
                         Text("Current best path (\(shortestPath.spaces.count - 1) moves): \(boardModel.pathAsString(path: shortestPath))")
                     }
                     
-                    Text("\(boardModel.visitedSpaces.count) / \(boardModel.boardSize * boardModel.boardSize) nodes checked")
+                    Text("\(boardModel.numberOfSpacesChecked) / \(boardModel.boardSize * boardModel.boardSize) nodes checked")
                         .padding()
                     
                     Text("Queue:").bold().underline()
@@ -132,7 +203,6 @@ struct HomeView: View {
                             }
                             Divider()
                         }
-                        
                     }
                 }
             }

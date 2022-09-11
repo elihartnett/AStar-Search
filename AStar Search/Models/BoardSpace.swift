@@ -14,7 +14,9 @@ class BoardSpace: Identifiable, ObservableObject, Equatable {
     var gridPoint: GridPoint
     @Published var type: SpaceType
     var distanceToGoal: Int?
-    @Published var overlay = Color.clear
+    var isBeingLookedAt = false
+    var visited = false
+    var inShortestPath = false
     
     init(type: SpaceType, gridPoint: GridPoint) {
         self.type = type
@@ -23,18 +25,5 @@ class BoardSpace: Identifiable, ObservableObject, Equatable {
     
     static func == (lhs: BoardSpace, rhs: BoardSpace) -> Bool {
         lhs.id == rhs.id
-    }
-    
-    func getColor() -> Color {
-        switch type {
-        case .start:
-            return .white
-        case .empty:
-            return .green
-        case .obstacle:
-            return .red
-        case .goal:
-            return .black
-        }
     }
 }

@@ -7,9 +7,9 @@
 
 import Foundation
 
-class Board: Identifiable, ObservableObject {
+class Board: Identifiable {
     let id = UUID()
-    @Published var rows: [BoardRow]
+    var rows: [BoardRow]
     
     init(rows: [BoardRow]) {
         self.rows = rows

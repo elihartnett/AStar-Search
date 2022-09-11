@@ -9,7 +9,7 @@ import Foundation
 
 class BoardRow: Identifiable, ObservableObject {
     let id = UUID()
-    @Published var spaces: [BoardSpace]
+    var spaces: [BoardSpace]
     
     init(spaces: [BoardSpace]) {
         self.spaces = spaces

@@ -57,9 +57,9 @@
 			children = (
 				62529C9B28BEAE610083F810 /* Board.swift */,
 				621392C628C1224C00CB0FE8 /* BoardRow.swift */,
+				62BA338128C436B000D30C3C /* Path.swift */,
 				621392C828C1225C00CB0FE8 /* BoardSpace.swift */,
 				6247A6AD28C2437600C8FB09 /* GridPoint.swift */,
-				62BA338128C436B000D30C3C /* Path.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -80,6 +80,15 @@
 				621392BD28C11BE800CB0FE8 /* BoardModel.swift */,
 			);
 			path = "View Models";
+			sourceTree = "<group>";
+		};
+		6219730228CE6DE70087F76C /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				621392CA28C1226F00CB0FE8 /* Enums.swift */,
+				621392CC28C1229900CB0FE8 /* Extensions.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 		62E6DE4428BEA95B00E31C8B = {
@@ -105,8 +114,7 @@
 				621392C028C11C7000CB0FE8 /* Views */,
 				621392C128C11C7500CB0FE8 /* View Models */,
 				621392BF28C11C6500CB0FE8 /* Models */,
-				621392CA28C1226F00CB0FE8 /* Enums.swift */,
-				621392CC28C1229900CB0FE8 /* Extensions.swift */,
+				6219730228CE6DE70087F76C /* Helpers */,
 				62E6DE5428BEA95C00E31C8B /* Assets.xcassets */,
 				62E6DE5628BEA95C00E31C8B /* Preview Content */,
 			);

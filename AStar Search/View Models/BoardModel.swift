@@ -11,14 +11,14 @@ import SwiftUI
 class BoardModel: ObservableObject {
     
     @Published var board = Board(rows: [])
-    @Published var boardSize = 10
+    var boardSize = 10
     let scale = 2
     
-    @Published var start: BoardSpace?
-    @Published var goal: BoardSpace?
+    var start: BoardSpace?
+    var goal: BoardSpace?
     
-    @Published var queue: [Path] = []
-    @Published var visitedSpaces: [BoardSpace] = []
+    var queue: [Path] = []
+    var numberOfSpacesChecked = 0
     
     @Published var shortestPath: Path?
     @Published var currentPath = Path(spaces: [])
@@ -50,23 +50,25 @@ class BoardModel: ObservableObject {
             newBoard.rows.append(newRow)
         }
         
-        let newStartSpaces = getScaledSpacesForSpace(scale: scale, space: start!)
-        start = newStartSpaces[0]
-        for space in newStartSpaces {
-            if space.gridPoint.x < start!.gridPoint.x && space.gridPoint.y < start!.gridPoint.y {
-                start = newBoard.rows[space.gridPoint.y].spaces[space.gridPoint.x]
+        if start != nil {
+            let newStartSpaces = getScaledSpacesForSpace(scale: scale, space: start!)
+            start = newStartSpaces[0]
+            for space in newStartSpaces {
+                if space.gridPoint.x < start!.gridPoint.x && space.gridPoint.y < start!.gridPoint.y {
+                    start = newBoard.rows[space.gridPoint.y].spaces[space.gridPoint.x]
+                }
             }
         }
-        print(start?.gridPoint)
         
-        let newGoalSpaces = getScaledSpacesForSpace(scale: scale, space: goal!)
-        goal = newGoalSpaces[0]
-        for space in newGoalSpaces {
-            if space.gridPoint.x < goal!.gridPoint.x && space.gridPoint.y < goal!.gridPoint.y {
-                goal = newBoard.rows[((boardSize * scale) - 1) - space.gridPoint.y].spaces[space.gridPoint.x]
+        if goal != nil {
+            let newGoalSpaces = getScaledSpacesForSpace(scale: scale, space: goal!)
+            goal = newGoalSpaces[0]
+            for space in newGoalSpaces {
+                if space.gridPoint.x < goal!.gridPoint.x && space.gridPoint.y < goal!.gridPoint.y {
+                    goal = newBoard.rows[((boardSize * scale) - 1) - space.gridPoint.y].spaces[space.gridPoint.x]
+                }
             }
         }
-        print(goal?.gridPoint)
         
         for (rowIndex, row) in board.rows.enumerated() {
             for (colIndex, _) in row.spaces.enumerated() {
@@ -86,12 +88,15 @@ class BoardModel: ObservableObject {
             }
         }
         
-        newBoard.rows[((boardSize * scale) - 1) - start!.gridPoint.y].spaces[start!.gridPoint.x].type = .start
-        newBoard.rows[((boardSize * scale) - 1) - goal!.gridPoint.y].spaces[goal!.gridPoint.x].type = .goal
-        
-        currentPath = Path(spaces: [start!])
-        queue.removeAll()
-        queue.append(currentPath)
+        if start != nil {
+            newBoard.rows[((boardSize * scale) - 1) - start!.gridPoint.y].spaces[start!.gridPoint.x].type = .start
+            currentPath = Path(spaces: [start!])
+            queue.removeAll()
+            queue.append(currentPath)
+        }
+        if goal != nil {
+            newBoard.rows[((boardSize * scale) - 1) - goal!.gridPoint.y].spaces[goal!.gridPoint.x].type = .goal
+        }
         
         board = newBoard
         boardSize *= scale
@@ -119,11 +124,11 @@ class BoardModel: ObservableObject {
         start = nil
         goal = nil
         queue.removeAll()
-        visitedSpaces.removeAll()
         shortestPath = nil
         currentSpace = nil
         currentPath.spaces.removeAll()
         boardSize = 10
+        numberOfSpacesChecked = 0
     }
     
     func handleConfigurationTap(addSpaceType: SpaceType, space: BoardSpace) {
@@ -136,8 +141,6 @@ class BoardModel: ObservableObject {
             space.type = .start
             start = space
             
-            visitedSpaces.removeAll()
-            visitedSpaces.append(start!)
             currentSpace = start
             currentPath = Path(spaces: [start!])
             queue.removeAll()
@@ -232,7 +235,7 @@ class BoardModel: ObservableObject {
         
         // Remove all spaces that have already been visited
         availableSpaces.removeAll { availableSpace in
-            visitedSpaces.contains(availableSpace)
+            availableSpace.visited == true
         }
         
         guard !availableSpaces.isEmpty else {
@@ -244,7 +247,8 @@ class BoardModel: ObservableObject {
         for space in availableSpaces {
             space.distanceToGoal = getChebyshevDistanceToGoal(space: space)
             if space.distanceToGoal != 0 {
-                visitedSpaces.append(space)
+                space.visited = true
+                numberOfSpacesChecked += 1
             }
         }
         
@@ -269,12 +273,13 @@ class BoardModel: ObservableObject {
             else {
                 // Go to next space in current path
                 lastSpace = currentSpace
-                lastSpace?.overlay = .clear
+                lastSpace?.isBeingLookedAt = false
                 currentSpace = closestSpace
                 
                 currentPath.spaces.append(closestSpace)
                 currentPath.distance += 1
-                currentSpace?.overlay = .yellow.opacity(0.5)
+                currentSpace?.isBeingLookedAt = true
+                
             }
         }
         
@@ -285,6 +290,8 @@ class BoardModel: ObservableObject {
         
         // Check if path is at end
         if currentSpace?.gridPoint == goal?.gridPoint {
+            currentSpace?.isBeingLookedAt = false
+            
             // Update shortest path if needed
             if shortestPath != nil {
                 if currentPath.distance < shortestPath!.distance { shortestPath = currentPath }
@@ -310,7 +317,7 @@ class BoardModel: ObservableObject {
     func highlightShortestPath() {
         for space in shortestPath!.spaces {
             if space.type != .start && space.type != .goal {
-                space.overlay = .yellow
+                space.inShortestPath = true
             }
         }
     }
