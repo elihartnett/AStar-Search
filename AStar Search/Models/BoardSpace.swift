@@ -16,7 +16,7 @@ class BoardSpace: Identifiable, ObservableObject, Equatable {
     var distanceToGoal: Int?
     var isBeingLookedAt = false
     var visited = false
-    var inShortestPath = false
+    @Published var inShortestPath = false
     
     init(type: SpaceType, gridPoint: GridPoint) {
         self.type = type

@@ -14,8 +14,8 @@ class BoardModel: ObservableObject {
     var boardSize = 10
     let scale = 2
     
-    var start: BoardSpace?
-    var goal: BoardSpace?
+    @Published var start: BoardSpace?
+    @Published var goal: BoardSpace?
     
     var queue: [Path] = []
     var numberOfSpacesChecked = 0
@@ -23,7 +23,6 @@ class BoardModel: ObservableObject {
     @Published var shortestPath: Path?
     @Published var currentPath = Path(spaces: [])
     @Published var currentSpace: BoardSpace?
-    @Published var lastSpace: BoardSpace?
     
     func createBoard() {
         
@@ -218,38 +217,40 @@ class BoardModel: ObservableObject {
     
     func makeNextMove() {
         
+        // Make sure current path's current distance + heuristic value is less than the shortest path's distance
+        // No need to search a path that has no chance at being shorter
         if shortestPath != nil {
             guard getMinimumDistanceToGoal(path: currentPath) < shortestPath!.distance else {
-                currentPath = queue.popLast()!
+                goToNextPath()
                 return
             }
         }
         
-        // Get available spaces
+        // Get available spaces for current path's most recent added space
         var availableSpaces = getAvailableSpacesFromGridPoint(gridPoint: currentPath.spaces.last!.gridPoint)
         
+        // If path can not go anywhere due to obstacles, path is at dead end and should go to next path and restart
         guard !availableSpaces.isEmpty else {
-            currentPath = queue.popLast()!
+            goToNextPath()
             return
         }
         
-        // Remove all spaces that have already been visited
+        // Remove all spaces from available spaces that have already been visited
         availableSpaces.removeAll { availableSpace in
             availableSpace.visited == true
         }
         
+        // If path can not go anywhere due to all nearby spaces having already been visited, go to next path and restart
         guard !availableSpaces.isEmpty else {
-            currentPath = queue.popLast()!
+            goToNextPath()
             return
         }
         
-        // Get each space's distance to goal
+        // For all available spaces left, get each space's distance to goal
         for space in availableSpaces {
             space.distanceToGoal = getChebyshevDistanceToGoal(space: space)
-            if space.distanceToGoal != 0 {
-                space.visited = true
-                numberOfSpacesChecked += 1
-            }
+            space.visited = true
+            numberOfSpacesChecked += 1
         }
         
         // Get closest space to goal
@@ -272,18 +273,16 @@ class BoardModel: ObservableObject {
             }
             else {
                 // Go to next space in current path
-                lastSpace = currentSpace
-                lastSpace?.isBeingLookedAt = false
+                currentSpace?.isBeingLookedAt = false
                 currentSpace = closestSpace
                 
                 currentPath.spaces.append(closestSpace)
                 currentPath.distance += 1
                 currentSpace?.isBeingLookedAt = true
-                
             }
         }
         
-        // Sort queue (closest path to goal is at end)
+        // Sort queue by distance traveled + heuristic
         queue = queue.sorted(by: { lhs, rhs in
             getMinimumDistanceToGoal(path: lhs) > getMinimumDistanceToGoal(path: rhs)
         })
@@ -301,7 +300,7 @@ class BoardModel: ObservableObject {
             }
             
             if !queue.isEmpty {
-                currentPath = queue.popLast()!
+                goToNextPath()
             }
         }
     }
@@ -314,8 +313,9 @@ class BoardModel: ObservableObject {
         return pathString
     }
     
-    func highlightShortestPath() {
-        for space in shortestPath!.spaces {
+    func highlightShortestPath(path: Path) {
+        currentSpace?.isBeingLookedAt = false
+        for space in path.spaces {
             if space.type != .start && space.type != .goal {
                 space.inShortestPath = true
             }
@@ -324,6 +324,13 @@ class BoardModel: ObservableObject {
     
     func getMinimumDistanceToGoal(path: Path) -> Int {
         return path.distance + getChebyshevDistanceToGoal(space: path.spaces.last!)
+    }
+    
+    func goToNextPath() {
+        currentSpace?.isBeingLookedAt = false
+        currentPath = queue.popLast()!
+        currentSpace = currentPath.spaces.last
+        currentSpace?.isBeingLookedAt = true
     }
 }
 

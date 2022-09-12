@@ -11,7 +11,6 @@ struct HomeView: View {
     
     @StateObject var boardModel = BoardModel()
     @State var addSpaceType: SpaceType = .start
-    @State var hasMadeFirstMove = false
     @State var showAlert = false
     @State var alertMessage = ""
     
@@ -32,6 +31,7 @@ struct HomeView: View {
             }
             .pickerStyle(.segmented)
             
+            // Legend
             HStack {
                 
                 VStack {
@@ -136,7 +136,7 @@ struct HomeView: View {
                         boardModel.makeNextMove()
                     }
                     else {
-                        boardModel.highlightShortestPath()
+                        boardModel.highlightShortestPath(path: boardModel.shortestPath!)
                     }
                 } label: {
                     VStack {
@@ -163,7 +163,7 @@ struct HomeView: View {
                         showAlert = true
                         return
                     }
-                    boardModel.highlightShortestPath()
+                    boardModel.highlightShortestPath(path: boardModel.shortestPath!)
                 } label: {
                     VStack {
                         Image(systemName: "forward.end.alt")
@@ -190,10 +190,14 @@ struct HomeView: View {
                     Text("\(boardModel.numberOfSpacesChecked) / \(boardModel.boardSize * boardModel.boardSize) nodes checked")
                         .padding()
                     
+                    Text("Current path: [ \(boardModel.pathAsString(path: boardModel.currentPath))]")
+                        .padding()
+                    
                     Text("Queue:").bold().underline()
                     
                     if boardModel.start != nil && boardModel.goal != nil {
-                        ForEach(boardModel.queue) { path in
+                        ForEach(0..<boardModel.queue.count, id: \.self) { index in
+                            let path = boardModel.queue[boardModel.queue.count - 1 - index]
                             HStack {
                                 Text("Minimum distance: \(boardModel.getMinimumDistanceToGoal(path: path))").bold()
                                     .background {
