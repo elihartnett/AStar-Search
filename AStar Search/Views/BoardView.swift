@@ -15,6 +15,7 @@ struct BoardView: View {
     var body: some View {
         
         GeometryReader { geo in
+            
             VStack(spacing: 0) {
                 
                 ForEach(boardModel.board.rows) { row in
@@ -37,7 +38,7 @@ struct BoardView: View {
                         let row = Int(floor(rowPercent * CGFloat(boardModel.boardSize)))
                         let col = Int(floor(heightPercent * CGFloat(boardModel.boardSize)))
                         
-                        if let space = boardModel.getBoardSpace(at: GridPoint(x: row, y: boardModel.boardSize - 1 - col)) {
+                        if let space = boardModel.getBoardSpace(at: GridPoint(x: row, y: col)) {
                             boardModel.handleConfigurationTap(addSpaceType: addSpaceType, space: space)
                         }
                     })
