@@ -8,33 +8,27 @@
 
 /* Begin PBXBuildFile section */
 		621392BE28C11BE800CB0FE8 /* BoardModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621392BD28C11BE800CB0FE8 /* BoardModel.swift */; };
-		621392C328C121BE00CB0FE8 /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621392C228C121BE00CB0FE8 /* BoardView.swift */; };
 		621392C528C1221D00CB0FE8 /* SpaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621392C428C1221D00CB0FE8 /* SpaceView.swift */; };
-		621392C728C1224C00CB0FE8 /* BoardRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621392C628C1224C00CB0FE8 /* BoardRow.swift */; };
 		621392C928C1225C00CB0FE8 /* BoardSpace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621392C828C1225C00CB0FE8 /* BoardSpace.swift */; };
-		621392CB28C1226F00CB0FE8 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621392CA28C1226F00CB0FE8 /* Enums.swift */; };
-		621392CD28C1229900CB0FE8 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621392CC28C1229900CB0FE8 /* Extensions.swift */; };
-		62529C9C28BEAE610083F810 /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62529C9B28BEAE610083F810 /* Board.swift */; };
+		62B1297A28D5140C00FEB25B /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B1297928D5140C00FEB25B /* Enums.swift */; };
 		62E6DE5128BEA95B00E31C8B /* AStar_SearchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E6DE5028BEA95B00E31C8B /* AStar_SearchApp.swift */; };
 		62E6DE5328BEA95B00E31C8B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E6DE5228BEA95B00E31C8B /* HomeView.swift */; };
 		62E6DE5528BEA95C00E31C8B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62E6DE5428BEA95C00E31C8B /* Assets.xcassets */; };
 		62E6DE5828BEA95C00E31C8B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62E6DE5728BEA95C00E31C8B /* Preview Assets.xcassets */; };
+		62F2E07D28D4C60A00DC7CD0 /* SwiftPriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F2E07C28D4C60A00DC7CD0 /* SwiftPriorityQueue.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		621392BD28C11BE800CB0FE8 /* BoardModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardModel.swift; sourceTree = "<group>"; };
-		621392C228C121BE00CB0FE8 /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
 		621392C428C1221D00CB0FE8 /* SpaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceView.swift; sourceTree = "<group>"; };
-		621392C628C1224C00CB0FE8 /* BoardRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardRow.swift; sourceTree = "<group>"; };
 		621392C828C1225C00CB0FE8 /* BoardSpace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardSpace.swift; sourceTree = "<group>"; };
-		621392CA28C1226F00CB0FE8 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
-		621392CC28C1229900CB0FE8 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		62529C9B28BEAE610083F810 /* Board.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
+		62B1297928D5140C00FEB25B /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		62E6DE4D28BEA95B00E31C8B /* AStar Search.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AStar Search.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		62E6DE5028BEA95B00E31C8B /* AStar_SearchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AStar_SearchApp.swift; sourceTree = "<group>"; };
 		62E6DE5228BEA95B00E31C8B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		62E6DE5428BEA95C00E31C8B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		62E6DE5728BEA95C00E31C8B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		62F2E07C28D4C60A00DC7CD0 /* SwiftPriorityQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftPriorityQueue.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,9 +45,9 @@
 		621392BF28C11C6500CB0FE8 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				62529C9B28BEAE610083F810 /* Board.swift */,
-				621392C628C1224C00CB0FE8 /* BoardRow.swift */,
 				621392C828C1225C00CB0FE8 /* BoardSpace.swift */,
+				62F2E07C28D4C60A00DC7CD0 /* SwiftPriorityQueue.swift */,
+				62B1297928D5140C00FEB25B /* Enums.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -62,7 +56,6 @@
 			isa = PBXGroup;
 			children = (
 				62E6DE5228BEA95B00E31C8B /* HomeView.swift */,
-				621392C228C121BE00CB0FE8 /* BoardView.swift */,
 				621392C428C1221D00CB0FE8 /* SpaceView.swift */,
 			);
 			path = Views;
@@ -74,15 +67,6 @@
 				621392BD28C11BE800CB0FE8 /* BoardModel.swift */,
 			);
 			path = "View Models";
-			sourceTree = "<group>";
-		};
-		6219730228CE6DE70087F76C /* Helpers */ = {
-			isa = PBXGroup;
-			children = (
-				621392CA28C1226F00CB0FE8 /* Enums.swift */,
-				621392CC28C1229900CB0FE8 /* Extensions.swift */,
-			);
-			path = Helpers;
 			sourceTree = "<group>";
 		};
 		62E6DE4428BEA95B00E31C8B = {
@@ -108,7 +92,6 @@
 				621392C028C11C7000CB0FE8 /* Views */,
 				621392C128C11C7500CB0FE8 /* View Models */,
 				621392BF28C11C6500CB0FE8 /* Models */,
-				6219730228CE6DE70087F76C /* Helpers */,
 				62E6DE5428BEA95C00E31C8B /* Assets.xcassets */,
 				62E6DE5628BEA95C00E31C8B /* Preview Content */,
 			);
@@ -195,13 +178,10 @@
 			files = (
 				621392BE28C11BE800CB0FE8 /* BoardModel.swift in Sources */,
 				62E6DE5328BEA95B00E31C8B /* HomeView.swift in Sources */,
-				621392C328C121BE00CB0FE8 /* BoardView.swift in Sources */,
-				621392C728C1224C00CB0FE8 /* BoardRow.swift in Sources */,
-				62529C9C28BEAE610083F810 /* Board.swift in Sources */,
-				621392CD28C1229900CB0FE8 /* Extensions.swift in Sources */,
+				62F2E07D28D4C60A00DC7CD0 /* SwiftPriorityQueue.swift in Sources */,
 				62E6DE5128BEA95B00E31C8B /* AStar_SearchApp.swift in Sources */,
 				621392C528C1221D00CB0FE8 /* SpaceView.swift in Sources */,
-				621392CB28C1226F00CB0FE8 /* Enums.swift in Sources */,
+				62B1297A28D5140C00FEB25B /* Enums.swift in Sources */,
 				621392C928C1225C00CB0FE8 /* BoardSpace.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -8,26 +8,27 @@
 import Foundation
 import SwiftUI
 
-class BoardSpace: Identifiable, Hashable, ObservableObject {
-    
+class BoardSpace: Comparable, ObservableObject {
     let id = UUID()
-    var gridPoint: GridPoint
-    @Published var type: SpaceType
-    @Published var highlight = false
+    let gridPoint: GridPoint
+    var type: SpaceType
+    var priority: Int
+    var closed = false
+    @Published var highlighted = false
     
-    init(type: SpaceType, gridPoint: GridPoint) {
-        self.type = type
+    init(gridPoint: GridPoint, type: SpaceType, priority: Int = 0) {
         self.gridPoint = gridPoint
+        self.type = type
+        self.priority = priority
     }
     
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+    static func < (lhs: BoardSpace, rhs: BoardSpace) -> Bool {
+        return lhs.priority  < rhs.priority
     }
     
     static func == (lhs: BoardSpace, rhs: BoardSpace) -> Bool {
         lhs.id == rhs.id
     }
-
 }
 
 struct GridPoint: Equatable {

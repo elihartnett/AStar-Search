@@ -10,175 +10,61 @@ import SwiftUI
 
 class BoardModel: ObservableObject {
     
-    @Published var board = Board(rows: [])
-    var boardSize = 10
-    let boardSizeIncreaseRate = 2
+    @Published var board: [BoardSpace] = []
+    var boardSize = 50
     
-    @Published var start: BoardSpace?
-    @Published var goal: BoardSpace?
+    var startPoint = GridPoint(x: 0, y: 0)
+    var goalPoint = GridPoint(x: 0, y: 0)
     
-    @Published var open = Array<BoardSpace>()
-    @Published var closed = Array<BoardSpace>()
+    var heuristic: Heuristic = .chebyshev
+    
+    var open: PriorityQueue<BoardSpace> = PriorityQueue(ascending: true)
     // Distance from start node
-    @Published var g = [String : Int]()
+    var g = [String : Int]()
     // Lower bound heuristic on optimal path cost to goal node
-    @Published var h = [String : Int]()
+    var h = [String : Int]()
     // Optimal cost from start to goal
-    @Published var f = [String : Int]()
-    @Published var parent = [String : BoardSpace?]()
+    var f = [String : Int]()
+    var parent = [String : BoardSpace?]()
     
-    func createBoard(boardSize: Int) -> Board {
-        let newBoard = Board(rows: [])
+    func createBoard() {
         for row in 0..<boardSize {
-            let newRow = BoardRow(spaces: [])
             for col in 0..<boardSize {
-                newRow.spaces.append(BoardSpace(type: .empty, gridPoint: GridPoint(x: col, y: row)))
+                let randomInt = Int.random(in: 1...5)
+                board.append(BoardSpace(gridPoint: GridPoint(x: col, y: row), type: randomInt == 5 ? .obstacle : .empty))
             }
-            newBoard.rows.append(newRow)
         }
-        return newBoard
+        
+        startPoint = generateRandomPoint()
+        let start = getBoardSpace(at: startPoint)
+        start?.type = .start
+        
+        goalPoint = generateRandomPoint()
+        let goal = getBoardSpace(at: goalPoint)
+        goal?.type = .goal
     }
     
-    func resetBoard() {
-        boardSize = 10
-        board = createBoard(boardSize: boardSize)
-        
-        start = nil
-        goal = nil
-        
-        open = Array<BoardSpace>()
-        closed = Array<BoardSpace>()
-        g = [String : Int]()
-        h = [String : Int]()
-        f = [String : Int]()
+    func generateRandomPoint() -> GridPoint {
+        let x = Int.random(in: 0..<boardSize)
+        let y = Int.random(in: 0..<boardSize)
+        return GridPoint(x: x, y: y)
     }
     
-    func scaleBoard() {
-        let newBoard = createBoard(boardSize: boardSize * boardSizeIncreaseRate)
+    func reset() {
+        board.removeAll()
+        startPoint = GridPoint(x: 0, y: 0)
+        goalPoint = GridPoint(x: 0, y: 0)
         
-        if let start {
-            let newStartGridPoints = getScaledGridPointsForGridPoint(gridPoint: start.gridPoint)
-            start.gridPoint = getSmallestGridPointInGridPoints(gridPoints: newStartGridPoints)
-        }
-        
-        if let goal {
-            let newGoalGridpoints = getScaledGridPointsForGridPoint(gridPoint: goal.gridPoint)
-            goal.gridPoint = getSmallestGridPointInGridPoints(gridPoints: newGoalGridpoints)
-        }
-                
-        for (rowIndex, row) in board.rows.enumerated() {
-            for (colIndex, _) in row.spaces.enumerated() {
-                let boardGridPoint = GridPoint(x: colIndex, y: rowIndex)
-                let boardSpace = getBoardSpace(at: boardGridPoint)!
-                
-                let scaledGridPoints = getScaledGridPointsForGridPoint(gridPoint: boardGridPoint)
-                for gridPoint in scaledGridPoints {
-                    newBoard.rows[gridPoint.y].spaces[gridPoint.x].type = boardSpace.type == .start || boardSpace.type == .goal ? .empty : boardSpace.type
-                }
-            }
-        }
-        
-        if let start {
-            let newBoardSpace = newBoard.rows[start.gridPoint.y].spaces[start.gridPoint.x]
-            newBoardSpace.type = .start
-        }
-        
-        if let goal {
-            let newBoardSpace = newBoard.rows[goal.gridPoint.y].spaces[goal.gridPoint.x]
-            newBoardSpace.type = .goal
-        }
-        
-        board = newBoard
-        boardSize *= 2
-    }
-    
-    func getScaledGridPointsForGridPoint(gridPoint: GridPoint) -> [GridPoint] {
-        var gridpoints: [GridPoint] = []
-        
-        let minX = gridPoint.x * boardSizeIncreaseRate
-        let minY = gridPoint.y * boardSizeIncreaseRate
-        
-        let maxX = minX + boardSizeIncreaseRate - 1
-        let maxY = minY + boardSizeIncreaseRate - 1
-        
-        for xSpace in minX...maxX {
-            for ySpace in minY...maxY {
-                gridpoints.append(GridPoint(x: xSpace, y: ySpace))
-            }
-        }
-        
-        return gridpoints
-    }
-    
-    func getSmallestGridPointInGridPoints(gridPoints: [GridPoint]) -> GridPoint {
-        var smallest = gridPoints[0]
-        for gridPoint in gridPoints {
-            if gridPoint.x < smallest.x && gridPoint.y < smallest.y {
-                smallest = gridPoint
-            }
-        }
-        return smallest
-    }
-    
-    func handleConfigurationTap(addSpaceType: SpaceType, space: BoardSpace) {
-        switch addSpaceType {
-        case .start:
-            resetStart()
-            if space.type == .goal {
-                resetGoal()
-            }
-            space.type = .start
-            start = space
-            
-        case .empty:
-            if space.type == .start {
-                resetStart()
-            }
-            else if space.type == .goal {
-                resetGoal()
-            }
-            space.type = .empty
-            
-        case .obstacle:
-            if space.type == .start {
-                resetStart()
-            }
-            space.type = .obstacle
-            
-        case .goal:
-            resetGoal()
-            if space.type == .start {
-                resetStart()
-            }
-            space.type = .goal
-            goal = space
-        }
-    }
-    
-    func resetStart() {
-        if let start {
-            board.rows[start.gridPoint.y].spaces[start.gridPoint.x].type = .empty
-        }
-        start = nil
-    }
-    
-    func resetGoal() {
-        if let goal {
-            board.rows[goal.gridPoint.y].spaces[goal.gridPoint.x].type = .empty
-        }
-        goal = nil
+        createBoard()
     }
     
     func boardContainsSpaceAtGridPoint(gridPoint: GridPoint) -> Bool {
-        let xRange = 0...boardSize - 1
-        let yRange = 0...boardSize - 1
-        
-        return (xRange.contains(gridPoint.x) && yRange.contains((gridPoint.y)))
+        return 0..<boardSize ~= gridPoint.x && 0..<boardSize ~= gridPoint.y
     }
     
     func getBoardSpace(at gridPoint: GridPoint) -> BoardSpace? {
         guard boardContainsSpaceAtGridPoint(gridPoint: gridPoint) else { return nil }
-        return board.rows[gridPoint.y].spaces[gridPoint.x]
+        return board[(gridPoint.y * boardSize) + gridPoint.x]
     }
     
     func getAvailableSpacesFromGridPoint(gridPoint: GridPoint) -> [BoardSpace] {
@@ -199,51 +85,57 @@ class BoardModel: ObservableObject {
     }
     
     func getChebyshevDistanceToGoal(space: BoardSpace) -> Int {
-        let x = abs(goal!.gridPoint.x - space.gridPoint.x)
-        let y = abs(goal!.gridPoint.y - space.gridPoint.y)
+        let x = abs(goalPoint.x - space.gridPoint.x)
+        let y = abs(goalPoint.y - space.gridPoint.y)
         return max(x, y)
     }
     
-    func startAstar() {
-        open.append(start!)
-        g[start!.id.uuidString] = 0
-        f[start!.id.uuidString] = getChebyshevDistanceToGoal(space: start!)
-        parent[start!.id.uuidString] = nil
+    func findShortestPathFromStartToGoal() {
+        let startSpace = getBoardSpace(at: startPoint)!
+        let goalSpace = getBoardSpace(at: goalPoint)!
+        
+        open.push(startSpace)
+        let key = startSpace.id.uuidString
+        g[key] = 0
+        h[key] = getChebyshevDistanceToGoal(space: startSpace)
+        f[key] = h[key]
+        parent[key] = nil
         
         while !open.isEmpty {
-            let currentSpace = open.popLast()!
+            let currentSpace = open.pop()!
             
-            if currentSpace.id == goal?.id {
+            if currentSpace.id == goalSpace.id && open.count == 0 {
                 return
             }
             
-            closed.append(currentSpace)
+            currentSpace.closed = true
             
             let adjacentSpaces = getAvailableSpacesFromGridPoint(gridPoint: currentSpace.gridPoint)
             for adjacentSpace in adjacentSpaces {
                 let key = adjacentSpace.id.uuidString
-                if !open.contains(adjacentSpace) && !closed.contains(adjacentSpace) {
+                if !open.contains(adjacentSpace) && !adjacentSpace.closed {
                     let distanceToGoal = getChebyshevDistanceToGoal(space: adjacentSpace)
                     g[key] = g[currentSpace.id.uuidString]! + 1
                     h[key] = distanceToGoal
                     f[key] = g[key]! + h[key]!
+                    adjacentSpace.priority = f[key]!
                     parent[key] = currentSpace
-                    open.append(adjacentSpace)
+                    open.push(adjacentSpace)
                 }
                 else if (g[currentSpace.id.uuidString]! + 1 < g[key]!) {
                     g[key] = g[currentSpace.id.uuidString]! + 1
                     h[key] = getChebyshevDistanceToGoal(space: adjacentSpace)
                     f[key] = g[key]! + h[key]!
+                    adjacentSpace.priority = f[key]!
                     parent[key] = currentSpace
                     
                     if open.contains(adjacentSpace) {
-                        open = open.sorted { lhs, rhs in
-                            getChebyshevDistanceToGoal(space: lhs) > getChebyshevDistanceToGoal(space: rhs)
-                        }
+                        let adjacentSpace = getBoardSpace(at: adjacentSpace.gridPoint)
+                        adjacentSpace?.priority -= 1
                     }
-                    else if closed.contains(adjacentSpace) {
-                        closed.remove(at: closed.firstIndex(of: adjacentSpace)!)
-                        open.append(adjacentSpace)
+                    else if adjacentSpace.closed {
+                        adjacentSpace.closed.toggle()
+                        open.push(adjacentSpace)
                     }
                 }
             }
@@ -267,7 +159,7 @@ class BoardModel: ObservableObject {
     
     func highlightPath(path: [BoardSpace]) {
         for space in path {
-            space.highlight = true
+            space.highlighted = true
         }
     }
 }

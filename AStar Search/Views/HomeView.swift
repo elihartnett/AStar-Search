@@ -10,45 +10,36 @@ import SwiftUI
 struct HomeView: View {
     
     @StateObject var boardModel = BoardModel()
-    @State var addSpaceType: SpaceType = .start
     @State var showAlert = false
     @State var alertMessage = ""
+    @State var boardSize = 50.0
     
     var body: some View {
         
         VStack {
             
-            // Picker
-            Picker("Picker", selection: $addSpaceType) {
-                Text("Start")
-                    .tag(SpaceType.start)
-                Text("Empty")
-                    .tag(SpaceType.empty)
-                Text("Obstacle")
-                    .tag(SpaceType.obstacle)
-                Text("Goal")
-                    .tag(SpaceType.goal)
-            }
-            .pickerStyle(.segmented)
-            
             // Legend
             HStack {
                 
-                VStack {
-                    Rectangle()
-                        .fill(.white)
-                        .frame(width: 25, height: 25)
-                    Text("Start")
-                }
-                .padding()
+                Spacer()
                 
                 VStack {
                     Rectangle()
                         .fill(.green)
                         .frame(width: 25, height: 25)
+                    Text("Start")
+                }
+                
+                Spacer()
+                
+                VStack {
+                    Rectangle()
+                        .fill(.white)
+                        .frame(width: 25, height: 25)
                     Text("Empty")
                 }
-                .padding()
+                
+                Spacer()
                 
                 VStack {
                     Rectangle()
@@ -56,7 +47,8 @@ struct HomeView: View {
                         .frame(width: 25, height: 25)
                     Text("Obstacle")
                 }
-                .padding()
+                
+                Spacer()
                 
                 VStack {
                     Rectangle()
@@ -64,73 +56,86 @@ struct HomeView: View {
                         .frame(width: 25, height: 25)
                     Text("Goal")
                 }
-                .padding()
+                
+                Spacer()
             }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background { Color.gray.opacity(0.5)}
+            .padding(30)
             
-            BoardView(boardModel: boardModel, addSpaceType: addSpaceType)
-                .rotation3DEffect(Angle(degrees: 180), axis: (x: 1, y: 0, z: 0))
-                .onAppear {
-                    boardModel.board = boardModel.createBoard(boardSize: 10)
-                }
-            
-            // Menu buttons
-            HStack {
-                
-                Spacer()
-                
-                Button {
-                    boardModel.resetBoard()
-                } label: {
-                    VStack {
-                        Image(systemName: "clear")
-                        Text("Reset")
+            // Board
+            VStack(spacing: 0) {
+                ForEach(0..<(boardModel.board.count / boardModel.boardSize), id: \.self) { rowIndex in
+                    HStack(spacing: 0) {
+                        ForEach(0..<boardModel.boardSize, id: \.self) { colIndex in
+                            SpaceView(space: boardModel.getBoardSpace(at: GridPoint(x: colIndex, y: rowIndex))!)
+                        }
                     }
                 }
+            }
+            .rotation3DEffect(Angle(degrees: 180), axis: (x: 1, y: 0, z: 0))
+            .onAppear {
+                boardModel.createBoard()
+            }
+            
+            // Actions
+            VStack {
+                Slider(value: $boardSize, in: 3...100, step: 1)
                 
-                Spacer()
-                
-                Button {
-                    boardModel.scaleBoard()
-                } label: {
-                    VStack {
-                        Image(systemName: "magnifyingglass")
-                        Text("Scale")
-                    }
-                }
-                
-                Spacer()
-                
-                Button {
-                    guard boardModel.start != nil && boardModel.goal != nil else {
-                        alertMessage = "Please make sure you have selected start and goal nodes."
-                        showAlert = true
-                        return
+                HStack {
+                    
+                    Button {
+                        boardModel.boardSize = Int(boardSize)
+                        boardModel.reset()
+                    } label: {
+                        VStack {
+                            Image(systemName: "arrow.counterclockwise")
+                            Text("Randomize")
+                        }
                     }
                     
-                    boardModel.startAstar()
-                    var path = boardModel.getParents(space: boardModel.goal!)
-                    path.remove(at: 0)
-                    path.remove(at: path.count - 1)
-                    boardModel.highlightPath(path: path)
-                } label: {
-                    VStack {
-                        Image(systemName: "forward.end.alt")
-                        Text("Skip to end")
+                    Button {
+                        DispatchQueue.global(qos: .userInitiated).async {
+                            boardModel.boardSize = Int(boardSize)
+                            
+                            boardModel.findShortestPathFromStartToGoal()
+                            
+                            DispatchQueue.main.async {
+                                var path = boardModel.getParents(space: boardModel.getBoardSpace(at: boardModel.goalPoint)!)
+                                guard path.count >= 2 else {
+                                    alertMessage = "No path found"
+                                    showAlert = true
+                                    return
+                                }
+                                path.remove(at: 0)
+                                path.remove(at: path.count - 1)
+                                boardModel.highlightPath(path: path)
+                            }
+                        }
+                    } label: {
+                        VStack {
+                            Image(systemName: "play.circle")
+                            Text("Start")
+                        }
                     }
+                    .disabled(Int(boardSize) != boardModel.boardSize)
+                    
+                    Picker("Picker", selection: $boardModel.heuristic) {
+                        Text("Chebyshev")
+                            .tag(Heuristic.chebyshev)
+                        Text("Manhatten")
+                            .tag(Heuristic.manhatten)
+                    }
+                    .pickerStyle(.segmented)
                 }
-                
-                Spacer()
-                
             }
             .padding()
-            .alert(alertMessage, isPresented: $showAlert) {
-                Button("Ok", role: .cancel) { }
-            }
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.gray.opacity(0.5))
+        .ignoresSafeArea()
+        .alert(alertMessage, isPresented: $showAlert) {
+            Button("Ok", role: .cancel) { }
+        }
     }
 }
 
