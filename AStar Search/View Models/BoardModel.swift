@@ -12,6 +12,7 @@ class BoardModel: ObservableObject {
     
     @Published var board: [BoardSpace] = []
     var boardSize = 50
+    @Published var timeToSolve = 0.0
     
     var startPoint = GridPoint(x: 0, y: 0)
     var goalPoint = GridPoint(x: 0, y: 0)
@@ -91,6 +92,8 @@ class BoardModel: ObservableObject {
     }
     
     func findShortestPathFromStartToGoal() {
+        let start = DispatchTime.now()
+        
         let startSpace = getBoardSpace(at: startPoint)!
         let goalSpace = getBoardSpace(at: goalPoint)!
         
@@ -139,6 +142,11 @@ class BoardModel: ObservableObject {
                     }
                 }
             }
+        }
+        
+        let finish = DispatchTime.now()
+        DispatchQueue.main.async {
+            self.timeToSolve = Double(finish.uptimeNanoseconds - start.uptimeNanoseconds) / 1000000000
         }
     }
     

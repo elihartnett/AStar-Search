@@ -108,6 +108,8 @@ struct HomeView: View {
                                 path.remove(at: 0)
                                 path.remove(at: path.count - 1)
                                 boardModel.highlightPath(path: path)
+                                alertMessage = "Time to solve \(Int(pow(Double(boardModel.boardSize), 2))) node grid: \(boardModel.timeToSolve.description) seconds"
+                                showAlert = true
                             }
                         }
                     } label: {
