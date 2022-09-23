@@ -15,7 +15,8 @@ enum SpaceType {
     case empty
 }
 
-enum Heuristic {
-    case chebyshev
-    case manhatten
+enum Heuristic: String {
+    case dijkstra = "Dijkstra"
+    case chebyshev = "Chebyshev"
+    case euclidean = "Euclidean"
 }

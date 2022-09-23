@@ -9,14 +9,15 @@ import Foundation
 import SwiftUI
 
 class BoardSpace: Comparable, ObservableObject {
-    let id = UUID()
+    var id = UUID()
     let gridPoint: GridPoint
     var type: SpaceType
-    var priority: Int
+    var priority: Double
     var closed = false
+    var open = false
     @Published var highlighted = false
     
-    init(gridPoint: GridPoint, type: SpaceType, priority: Int = 0) {
+    init(gridPoint: GridPoint, type: SpaceType, priority: Double = 0) {
         self.gridPoint = gridPoint
         self.type = type
         self.priority = priority

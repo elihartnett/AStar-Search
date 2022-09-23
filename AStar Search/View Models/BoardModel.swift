@@ -21,18 +21,23 @@ class BoardModel: ObservableObject {
     
     var open: PriorityQueue<BoardSpace> = PriorityQueue(ascending: true)
     // Distance from start node
-    var g = [String : Int]()
+    var g = [String : Double]()
     // Lower bound heuristic on optimal path cost to goal node
-    var h = [String : Int]()
+    var h = [String : Double]()
     // Optimal cost from start to goal
-    var f = [String : Int]()
+    var f = [String : Double]()
     var parent = [String : BoardSpace?]()
+    
+    init() {
+        createBoard()
+    }
     
     func createBoard() {
         for row in 0..<boardSize {
+            print("Row \(row) / \(boardSize)")
             for col in 0..<boardSize {
                 let randomInt = Int.random(in: 1...5)
-                board.append(BoardSpace(gridPoint: GridPoint(x: col, y: row), type: randomInt == 5 ? .obstacle : .empty))
+                board.append(BoardSpace(gridPoint: GridPoint(x: col, y: row), type: randomInt == 6 ? .obstacle : .empty))
             }
         }
         
@@ -74,7 +79,7 @@ class BoardModel: ObservableObject {
         let x = gridPoint.x
         let y = gridPoint.y
         
-        let possibleMoves = [GridPoint(x: x, y: y + 1), GridPoint(x: x, y: y - 1), GridPoint(x: x - 1, y: y), GridPoint(x: x + 1, y: y), GridPoint(x: x - 1, y: y + 1), GridPoint(x: x + 1, y: y + 1), GridPoint(x: x - 1, y: y - 1), GridPoint(x: x + 1, y: y - 1)]
+        let possibleMoves = [GridPoint(x: x, y: y + 1), GridPoint(x: x, y: y - 1), GridPoint(x: x - 1, y: y), GridPoint(x: x + 1, y: y)]
         
         for space in possibleMoves {
             if let boardSpace = getBoardSpace(at: space) {
@@ -91,6 +96,23 @@ class BoardModel: ObservableObject {
         return max(x, y)
     }
     
+    func getEuclideanDistanceToGoal(space: BoardSpace) -> Double {
+        let a = goalPoint.x - space.gridPoint.x
+        let b = goalPoint.y - space.gridPoint.y
+        return sqrt(Double((a*a) + (b*b)))
+    }
+    
+    func getHeuristicValue(space: BoardSpace) -> Double {
+        switch heuristic {
+        case .dijkstra:
+            return 0
+        case .chebyshev:
+            return Double(getChebyshevDistanceToGoal(space: space))
+        case .euclidean:
+            return getEuclideanDistanceToGoal(space: space)
+        }
+    }
+    
     func findShortestPathFromStartToGoal() {
         let start = DispatchTime.now()
         
@@ -98,14 +120,17 @@ class BoardModel: ObservableObject {
         let goalSpace = getBoardSpace(at: goalPoint)!
         
         open.push(startSpace)
+        startSpace.open = true
         let key = startSpace.id.uuidString
         g[key] = 0
-        h[key] = getChebyshevDistanceToGoal(space: startSpace)
+        h[key] = getHeuristicValue(space: startSpace)
         f[key] = h[key]
         parent[key] = nil
         
         while !open.isEmpty {
             let currentSpace = open.pop()!
+            print(currentSpace.gridPoint)
+            currentSpace.open = false
             
             if currentSpace.id == goalSpace.id && open.count == 0 {
                 return
@@ -116,29 +141,35 @@ class BoardModel: ObservableObject {
             let adjacentSpaces = getAvailableSpacesFromGridPoint(gridPoint: currentSpace.gridPoint)
             for adjacentSpace in adjacentSpaces {
                 let key = adjacentSpace.id.uuidString
-                if !open.contains(adjacentSpace) && !adjacentSpace.closed {
-                    let distanceToGoal = getChebyshevDistanceToGoal(space: adjacentSpace)
+                if !adjacentSpace.open && !adjacentSpace.closed {
+                    let distanceToGoal = getHeuristicValue(space: adjacentSpace)
                     g[key] = g[currentSpace.id.uuidString]! + 1
                     h[key] = distanceToGoal
                     f[key] = g[key]! + h[key]!
                     adjacentSpace.priority = f[key]!
                     parent[key] = currentSpace
                     open.push(adjacentSpace)
+                    adjacentSpace.open = true
                 }
                 else if (g[currentSpace.id.uuidString]! + 1 < g[key]!) {
                     g[key] = g[currentSpace.id.uuidString]! + 1
-                    h[key] = getChebyshevDistanceToGoal(space: adjacentSpace)
+                    h[key] = getHeuristicValue(space: adjacentSpace)
                     f[key] = g[key]! + h[key]!
                     adjacentSpace.priority = f[key]!
-                    parent[key] = currentSpace
                     
-                    if open.contains(adjacentSpace) {
+                    if adjacentSpace.open {
                         let adjacentSpace = getBoardSpace(at: adjacentSpace.gridPoint)
-                        adjacentSpace?.priority -= 1
+                        let newBoardSpace = BoardSpace(gridPoint: adjacentSpace!.gridPoint, type: adjacentSpace!.type)
+                        newBoardSpace.id = adjacentSpace!.id
+                        
+                        open.remove(adjacentSpace!)
+                        open.push(newBoardSpace)
+                        adjacentSpace?.open = true
                     }
                     else if adjacentSpace.closed {
                         adjacentSpace.closed.toggle()
                         open.push(adjacentSpace)
+                        adjacentSpace.open = true
                     }
                 }
             }
@@ -168,6 +199,12 @@ class BoardModel: ObservableObject {
     func highlightPath(path: [BoardSpace]) {
         for space in path {
             space.highlighted = true
+        }
+    }
+    
+    func unHighlightPath(path: [BoardSpace]) {
+        for space in path {
+            space.highlighted = false
         }
     }
 }
