@@ -17,6 +17,6 @@ enum SpaceType {
 
 enum Heuristic: String {
     case dijkstra = "Dijkstra"
-    case chebyshev = "Chebyshev"
+    case manhattan = "Manhattan"
     case euclidean = "Euclidean"
 }

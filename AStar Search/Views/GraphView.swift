@@ -12,7 +12,6 @@ struct GraphView: View {
     
     @StateObject var boardModel = BoardModel()
     @State var chartData: [Series] = []
-    @State var boardSize: Double = 500
     
     var body: some View {
         
@@ -34,82 +33,83 @@ struct GraphView: View {
             HStack {
                 
                 Button {
-                    DispatchQueue.main.async {
-                        chartData.removeAll()
-                        
-                        boardModel.boardSize = Int(boardSize)
-                        boardModel.reset()
+                    chartData.removeAll()
 
-                        chartData.append(Series(heuristic: .dijkstra, data: (inputSize: 0, time: Double(0.0))))
-                        runDijkstra(size: Int(boardSize))
-                    
-                        chartData.append(Series(heuristic: .chebyshev, data: (inputSize: 0, time: Double(0.0))))
-                        runChebyshev(size: Int(boardSize))
-                        
-    //                    runEuclidean(size: Int(size))
-                    }
+                    boardModel.boardSize = 10
+                    boardModel.reset()
+                    runDijkstra(size: 10)
+                    runManhattan(size: 10)
+                    runEuclidean(size: 10)
+                                        
+                    boardModel.boardSize = 100
+                    boardModel.reset()
+                    runDijkstra(size: 100)
+                    runManhattan(size: 100)
+                    runEuclidean(size: 100)
+                                        
+                    boardModel.boardSize = 200
+                    boardModel.reset()
+                    runDijkstra(size: 200)
+                    runManhattan(size: 200)
+                    runEuclidean(size: 200)
+                                        
+                    boardModel.boardSize = 500
+                    boardModel.reset()
+                    runDijkstra(size: 500)
+                    runManhattan(size: 500)
+                    runEuclidean(size: 500)
+                                        
+                    boardModel.boardSize = 1000
+                    boardModel.reset()
+                    runDijkstra(size: 1000)
+                    runManhattan(size: 1000)
+                    runEuclidean(size: 1000)
                 } label: {
                     Image(systemName: "play.circle")
                 }
-                
-                Text((boardSize * boardSize).formatted())
-                
-                Slider(value: $boardSize, in: 100...1000, step: 1)
             }
         }
         .padding()
     }
     
-    func prepareForNext() {
-        boardModel.open = PriorityQueue(ascending: true)
-        boardModel.g = [String : Double]()
-        boardModel.h = [String : Double]()
-        boardModel.f = [String : Double]()
-        boardModel.parent = [String : BoardSpace?]()
-        for boardSpace in boardModel.board {
-            boardSpace.closed = false
-            boardSpace.open = false
-        }
-    }
-    
-        func runDijkstra(size: Int) {
-            boardModel.heuristic = .dijkstra
-            
-            prepareForNext()
-            
-            let start = DispatchTime.now()
-            boardModel.findShortestPathFromStartToGoal()
-            let finish = DispatchTime.now()
-            let timeInterval = Int(finish.uptimeNanoseconds - start.uptimeNanoseconds)
-            
-            chartData.append(Series(heuristic: .dijkstra, data: (inputSize: size, time: Double(timeInterval))))
-        }
-    
-    func runChebyshev(size: Int) {
-        boardModel.heuristic = .chebyshev
+    func runDijkstra(size: Int) {
+        boardModel.heuristic = .dijkstra
         
-        prepareForNext()
+        boardModel.prepareForNext()
         
         let start = DispatchTime.now()
         boardModel.findShortestPathFromStartToGoal()
         let finish = DispatchTime.now()
         let timeInterval = Int(finish.uptimeNanoseconds - start.uptimeNanoseconds)
         
-        chartData.append(Series(heuristic: .chebyshev, data: (inputSize: size, time: Double(timeInterval))))
+        chartData.append(Series(heuristic: .dijkstra, data: (inputSize: size, time: Double(timeInterval))))
+    }
+    
+    func runManhattan(size: Int) {
+        boardModel.heuristic = .manhattan
+        
+        boardModel.prepareForNext()
+        
+        let start = DispatchTime.now()
+        boardModel.findShortestPathFromStartToGoal()
+        let finish = DispatchTime.now()
+        let timeInterval = Int(finish.uptimeNanoseconds - start.uptimeNanoseconds)
+        
+        chartData.append(Series(heuristic: .manhattan, data: (inputSize: size, time: Double(timeInterval))))
     }
     
     func runEuclidean(size: Int) {
-            boardModel.heuristic = .euclidean
+        boardModel.heuristic = .euclidean
         
-            prepareForNext()
-                        
-            let start = DispatchTime.now()
-            boardModel.findShortestPathFromStartToGoal()
-            let finish = DispatchTime.now()
-            let timeInterval = Int(finish.uptimeNanoseconds - start.uptimeNanoseconds)
-            
-            chartData.append(Series(heuristic: .euclidean, data: (inputSize: size, time: Double(timeInterval))))
-        }
+        boardModel.prepareForNext()
+        
+        let start = DispatchTime.now()
+        boardModel.findShortestPathFromStartToGoal()
+        let finish = DispatchTime.now()
+        let timeInterval = Int(finish.uptimeNanoseconds - start.uptimeNanoseconds)
+        
+        chartData.append(Series(heuristic: .euclidean, data: (inputSize: size, time: Double(timeInterval))))
+    }
 }
 
 struct Series: Identifiable {

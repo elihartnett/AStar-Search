@@ -11,13 +11,13 @@ import SwiftUI
 class BoardModel: ObservableObject {
     
     @Published var board: [BoardSpace] = []
-    var boardSize = 50
-    @Published var timeToSolve = 0.0
+    var boardSize = 25
+    var timeToSolve = 0.0
     
     var startPoint = GridPoint(x: 0, y: 0)
     var goalPoint = GridPoint(x: 0, y: 0)
     
-    var heuristic: Heuristic = .chebyshev
+    var heuristic: Heuristic = .manhattan
     
     var open: PriorityQueue<BoardSpace> = PriorityQueue(ascending: true)
     // Distance from start node
@@ -34,10 +34,9 @@ class BoardModel: ObservableObject {
     
     func createBoard() {
         for row in 0..<boardSize {
-            print("Row \(row) / \(boardSize)")
             for col in 0..<boardSize {
-                let randomInt = Int.random(in: 1...5)
-                board.append(BoardSpace(gridPoint: GridPoint(x: col, y: row), type: randomInt == 6 ? .obstacle : .empty))
+                let randomInt = Int.random(in: 1...10)
+                board.append(BoardSpace(gridPoint: GridPoint(x: col, y: row), type: randomInt == 10 ? .obstacle : .empty))
             }
         }
         
@@ -90,10 +89,10 @@ class BoardModel: ObservableObject {
         return availableSpaces
     }
     
-    func getChebyshevDistanceToGoal(space: BoardSpace) -> Int {
+    func getManhattanDistanceToGoal(space: BoardSpace) -> Int {
         let x = abs(goalPoint.x - space.gridPoint.x)
         let y = abs(goalPoint.y - space.gridPoint.y)
-        return max(x, y)
+        return x + y
     }
     
     func getEuclideanDistanceToGoal(space: BoardSpace) -> Double {
@@ -106,8 +105,8 @@ class BoardModel: ObservableObject {
         switch heuristic {
         case .dijkstra:
             return 0
-        case .chebyshev:
-            return Double(getChebyshevDistanceToGoal(space: space))
+        case .manhattan:
+            return Double(getManhattanDistanceToGoal(space: space))
         case .euclidean:
             return getEuclideanDistanceToGoal(space: space)
         }
@@ -129,11 +128,10 @@ class BoardModel: ObservableObject {
         
         while !open.isEmpty {
             let currentSpace = open.pop()!
-            print(currentSpace.gridPoint)
             currentSpace.open = false
             
-            if currentSpace.id == goalSpace.id && open.count == 0 {
-                return
+            if currentSpace.id == goalSpace.id {
+                break
             }
             
             currentSpace.closed = true
@@ -161,6 +159,10 @@ class BoardModel: ObservableObject {
                         let adjacentSpace = getBoardSpace(at: adjacentSpace.gridPoint)
                         let newBoardSpace = BoardSpace(gridPoint: adjacentSpace!.gridPoint, type: adjacentSpace!.type)
                         newBoardSpace.id = adjacentSpace!.id
+                        newBoardSpace.open = adjacentSpace!.open
+                        newBoardSpace.closed = adjacentSpace!.closed
+                        newBoardSpace.priority = adjacentSpace!.priority
+                        newBoardSpace.highlighted = adjacentSpace!.highlighted
                         
                         open.remove(adjacentSpace!)
                         open.push(newBoardSpace)
@@ -176,8 +178,19 @@ class BoardModel: ObservableObject {
         }
         
         let finish = DispatchTime.now()
-        DispatchQueue.main.async {
-            self.timeToSolve = Double(finish.uptimeNanoseconds - start.uptimeNanoseconds) / 1000000000
+        self.timeToSolve = Double(finish.uptimeNanoseconds - start.uptimeNanoseconds) / 1000000000
+    }
+    
+    func prepareForNext() {
+        open = PriorityQueue(ascending: true)
+        g = [String : Double]()
+        h = [String : Double]()
+        f = [String : Double]()
+        parent = [String : BoardSpace?]()
+        for boardSpace in board {
+            boardSpace.closed = false
+            boardSpace.open = false
+            boardSpace.highlighted = false
         }
     }
     
