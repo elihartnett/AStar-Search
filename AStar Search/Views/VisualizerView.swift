@@ -92,7 +92,7 @@ struct VisualizerView: View {
             
             // Actions
             VStack {
-                Slider(value: $boardSize, in: 3...50, step: 1)
+                Slider(value: $boardSize, in: 3...100, step: 1)
                 
                 HStack {
                     
