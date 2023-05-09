@@ -1,4 +1,5 @@
 # AStar-Search
+Shortest path visualization
 
 <img src="https://raw.githubusercontent.com/Elichartnett/AStar-Search/main/1.png" alt="1" width="300"/>
 
